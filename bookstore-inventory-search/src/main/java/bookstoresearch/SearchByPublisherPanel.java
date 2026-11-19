@@ -14,6 +14,7 @@ import javax.swing.JTextField;
 
 public class SearchByPublisherPanel extends JPanel {
 	private static final long serialVersionUID = 1L; 
+	private static final Book NO_BOOKS = new Book("No books found", "", "", "", "", "");
 	
 	Vector<Book> bookList = new Vector<Book>();
 	Vector<Publisher> pubList = new Vector<Publisher>();
@@ -24,7 +25,7 @@ public class SearchByPublisherPanel extends JPanel {
 	
 	JTextField price = new JTextField(10);
 	
-	DefaultListModel<Branch> inventory = new DefaultListModel<Branch>();
+	DefaultListModel<String> inventory = new DefaultListModel<String>();
 	
 	
 	public SearchByPublisherPanel() {
@@ -35,7 +36,6 @@ public class SearchByPublisherPanel extends JPanel {
 
 		pubList = HenryDAO.getPublisher();
 		bookList = HenryDAO.getBooksByPublisher(pubList.get(0).getCode());
-		branches = HenryDAO.getInventory(bookList.get(0).getBookNum());
 		
 		publishers.removeAllItems();
 		books.removeAllItems();
@@ -45,24 +45,34 @@ public class SearchByPublisherPanel extends JPanel {
 			publishers.addItem(pubList.get(i));
 		}
 		
-		for(int i = 0; i<bookList.size(); i++) {
-			books.addItem(bookList.get(i));
-		}
-		
-		for(int i = 0; i<branches.size(); i++) {
-			inventory.addElement(branches.get(i));
-		}
-		
 		publishers.setSelectedIndex(0);
-		books.setSelectedIndex(0);
+		
+		if(bookList.isEmpty()) {
+			books.setEnabled(false);
+			books.addItem(NO_BOOKS);
+			price.setText("N/A");
+			inventory.addElement("No copies in stock");
+		}
+		else {
+			branches = HenryDAO.getInventory(bookList.get(0).getBookNum());
+			
+			for(int i = 0; i<bookList.size(); i++) {
+				books.addItem(bookList.get(i));
+			}
+			
+			for(int i = 0; i<branches.size(); i++) {
+				inventory.addElement(branches.get(i).toString());
+			}
+			
+			books.setSelectedIndex(0);
+			price.setText(bookList.get(0).getPrice());
+		}
 		
 		this.add(publishers);
 		this.add(books);
-		
-		price.setText(bookList.get(0).getPrice());
 		this.add(price);
 		
-		JList<Branch> list = new JList<Branch>(inventory);
+		JList<String> list = new JList<String>(inventory);
 		this.add(list);
 		
 
@@ -78,27 +88,45 @@ public class SearchByPublisherPanel extends JPanel {
 				
 				
 					books.removeAllItems();
-					for (int i=0; i<bookList.size(); i++) {
-						books.addItem(bookList.get(i));
+					inventory.clear();
+					
+					if(bookList.isEmpty()) {
+						books.setEnabled(false);
+						books.addItem(NO_BOOKS);
+						price.setText("N/A");
+						inventory.addElement("No copies in stock");
 					}
-				
-					books.setSelectedIndex(0);
-					price.setText(bookList.get(0).getPrice());
+					else {
+						books.setEnabled(true);
+						for (int i=0; i<bookList.size(); i++) {
+							books.addItem(bookList.get(i));
+						}
+						
+						books.setSelectedIndex(0);
+						price.setText(bookList.get(0).getPrice());
+					}
 				}
 				
 				else if(e.getSource() == books) {
 					JComboBox<Book> box = (JComboBox<Book>) e.getSource();
 					Book newBook = (Book)box.getSelectedItem();
-					int i = box.getSelectedIndex();
+					
+					// Ignore events from clearing the list or from the "No books found" placeholder
+					if(newBook == null || !box.isEnabled()) {
+						return;
+					}
 							
-					price.setText(bookList.get(i).getPrice());
+					price.setText(newBook.getPrice());
 					inventory.clear();
 					
 					branches = HenryDAO.getInventory(newBook.getBookNum());
-					System.out.println("Location: "+ branches.get(0));
+					
+					if(branches.isEmpty()) {
+						inventory.addElement("No copies in stock");
+					}
 					
 					for(int j = 0; j<branches.size(); j++) {
-						inventory.addElement(branches.get(j));
+						inventory.addElement(branches.get(j).toString());
 					}
 					
 				}
@@ -110,9 +138,6 @@ public class SearchByPublisherPanel extends JPanel {
 		
 		publishers.addActionListener(listener);
 		books.addActionListener(listener);
-		
-	
-		this.add(list);
 	}
 
 }
