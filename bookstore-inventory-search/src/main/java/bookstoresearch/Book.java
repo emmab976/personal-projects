@@ -1,4 +1,4 @@
-package assignment1;
+package bookstoresearch;
 
 public class Book {
 	private String title;

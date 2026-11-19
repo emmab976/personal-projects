@@ -1,4 +1,4 @@
-package assignment1;
+package bookstoresearch;
 
 public class Publisher {
 	private String code;

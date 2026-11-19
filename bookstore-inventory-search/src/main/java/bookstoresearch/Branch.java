@@ -1,4 +1,4 @@
-package assignment1;
+package bookstoresearch;
 
 public class Branch {
 	//handles the inventory of each branch

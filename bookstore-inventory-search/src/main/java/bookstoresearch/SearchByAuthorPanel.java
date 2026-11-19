@@ -1,4 +1,4 @@
-package assignment1;
+package bookstoresearch;
 
 import java.awt.Color;
 import java.awt.datatransfer.SystemFlavorMap;

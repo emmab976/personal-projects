@@ -1,4 +1,4 @@
-package assignment1;
+package bookstoresearch;
 
 import java.util.Iterator;
 import java.util.Vector;

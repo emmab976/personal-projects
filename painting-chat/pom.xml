@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.emmabryant</groupId>
-    <artifactId>painter-chat</artifactId>
+    <artifactId>painting-chat</artifactId>
     <version>1.0.0</version>
     <name>Multi-User Painter and Chat</name>
 
@@ -21,8 +21,8 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.5.0</version>
                 <configuration>
-                    <!-- Default is the client; run the server with -Dexec.mainClass=emmabryant_painter_comp2355.Hub -->
-                    <mainClass>emmabryant_painter_comp2355.Painter</mainClass>
+                    <!-- Default is the client; run the server with -Dexec.mainClass=paintingchat.Hub -->
+                    <mainClass>paintingchat.Painter</mainClass>
                 </configuration>
             </plugin>
         </plugins>

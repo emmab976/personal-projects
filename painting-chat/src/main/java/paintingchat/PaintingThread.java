@@ -1,4 +1,4 @@
-package emmabryant_painter_comp2355;
+package paintingchat;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

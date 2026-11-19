@@ -5,9 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.emmabryant</groupId>
-    <artifactId>henry-books</artifactId>
+    <artifactId>bookstore-inventory-search</artifactId>
     <version>1.0.0</version>
-    <name>Henry Books Lookup</name>
+    <name>Bookstore Inventory Search</name>
 
     <properties>
         <maven.compiler.release>17</maven.compiler.release>
@@ -29,7 +29,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.5.0</version>
                 <configuration>
-                    <mainClass>assignment1.driver</mainClass>
+                    <mainClass>bookstoresearch.driver</mainClass>
                 </configuration>
             </plugin>
         </plugins>

@@ -1,4 +1,4 @@
-package assignment1;
+package bookstoresearch;
 
 import java.io.FileInputStream;
 import java.io.IOException;
