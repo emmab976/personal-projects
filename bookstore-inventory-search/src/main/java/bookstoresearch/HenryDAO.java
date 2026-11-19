@@ -8,6 +8,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.PreparedStatement;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -50,25 +51,23 @@ public class HenryDAO {
     }
     
     public static Vector<Author> getAuthor() {
-        Connection connection = HenryDAO.getConnection();
         Vector<Author> authors = new Vector<Author>();
         Author auth;
-        try {
-            Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM henry_author");
+        String sql = "SELECT * FROM henry_author";
+        
+        try (Connection connection = HenryDAO.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
 
             while(rs.next())
             {
-            	
                 String ID = ( rs.getString("author_num"));
                 String nameFirst = ( rs.getString("author_first") );
                 String nameLast = ( rs.getString("author_last") );
                 String fullName = nameFirst + " " + nameLast;
                 auth = new Author(fullName, ID);
                 authors.add(auth);
-                
             }
-            
 
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -78,27 +77,27 @@ public class HenryDAO {
     }
     
     public static Vector<Book> getBooksByAuthor(String author_num){
-        Connection connection = HenryDAO.getConnection();
         Vector<Book> books = new Vector<Book>();
         Book book;
+        String sql = "SELECT DISTINCT(title), henry_book.book_code, type, publisher_code, price, paperback FROM henry_book JOIN henry_inventory ON henry_book.book_code = henry_inventory.book_code JOIN henry_wrote ON henry_inventory.book_code = henry_wrote.book_code WHERE author_num = ?";
     	
-        try {
-            Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT DISTINCT(title), henry_book.book_code, type, publisher_code, price, paperback FROM henry_book JOIN henry_inventory ON henry_book.book_code = henry_inventory.book_code JOIN henry_wrote ON henry_inventory.book_code = henry_wrote.book_code WHERE author_num = " + author_num);
+        try (Connection connection = HenryDAO.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, author_num);
             
-            while(rs.next())
-            {
-            	
-               String ID = ( rs.getString("book_code"));
-               String title = ( rs.getString("title") );
-               String genre = ( rs.getString("type") );
-               String publisher = (rs.getString("publisher_code"));
-               String price = (rs.getString("price"));
-               String paperback = (rs.getString("paperback"));
-                
-                book = new Book(title, ID, genre, price, publisher, paperback);
-                books.add(book);
-                
+            try (ResultSet rs = stmt.executeQuery()) {
+                while(rs.next())
+                {
+                    String ID = ( rs.getString("book_code"));
+                    String title = ( rs.getString("title") );
+                    String genre = ( rs.getString("type") );
+                    String publisher = (rs.getString("publisher_code"));
+                    String price = (rs.getString("price"));
+                    String paperback = (rs.getString("paperback"));
+                    
+                    book = new Book(title, ID, genre, price, publisher, paperback);
+                    books.add(book);
+                }
             }
             
         } catch (SQLException ex) {
@@ -108,24 +107,24 @@ public class HenryDAO {
         return books;
     }
     
-        public static Vector<Branch> getInventory(String book_code){
-        Connection connection = HenryDAO.getConnection();
+    public static Vector<Branch> getInventory(String book_code){
         Vector<Branch> inventory = new Vector<Branch>();
         Branch branch;
+        String sql = "SELECT branch_name, on_hand FROM henry_inventory JOIN henry_branch ON henry_inventory.branch_num = henry_branch.branch_num WHERE book_code = ?";
     	
-        try {
-            Statement stmt = connection.createStatement();
-                        ResultSet rs = stmt.executeQuery("SELECT branch_name, on_hand FROM henry_inventory JOIN henry_branch ON henry_inventory.branch_num = henry_branch.branch_num WHERE book_code = '" + book_code + "'");
+        try (Connection connection = HenryDAO.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, book_code);
             
-            while(rs.next())
-            {
-            	
-                String name = ( rs.getString("branch_name") );
-                int onHand = ( rs.getInt("on_hand") );
-                
-                branch = new Branch(name, onHand);
-                inventory.add(branch);
-                
+            try (ResultSet rs = stmt.executeQuery()) {
+                while(rs.next())
+                {
+                    String name = ( rs.getString("branch_name") );
+                    int onHand = ( rs.getInt("on_hand") );
+                    
+                    branch = new Branch(name, onHand);
+                    inventory.add(branch);
+                }
             }
             
         } catch (SQLException ex) {
@@ -136,13 +135,13 @@ public class HenryDAO {
     }
     
     public static Vector<Publisher> getPublisher(){
-        Connection connection = HenryDAO.getConnection();
         Vector<Publisher> publishers = new Vector<Publisher>();
         Publisher publisher;
+        String sql = "SELECT * FROM henry_publisher WHERE publisher_code IN (SELECT publisher_code FROM henry_book)";
     	
-        try {
-            Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM henry_publisher WHERE publisher_code IN (SELECT publisher_code FROM henry_book)");
+        try (Connection connection = HenryDAO.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
             
             while(rs.next())
             {
@@ -152,7 +151,6 @@ public class HenryDAO {
                 
                 publisher = new Publisher(code, name, city);
                 publishers.add(publisher);
-                
             }
             
         } catch (SQLException ex) {
@@ -163,27 +161,27 @@ public class HenryDAO {
     }
     
     public static Vector<Book> getBooksByPublisher(String publisher_code){
-        Connection connection = HenryDAO.getConnection();
         Vector<Book> books = new Vector<Book>();
         Book book;
+        String sql = "SELECT DISTINCT(title), henry_book.book_code, type, henry_book.publisher_code, price, paperback FROM henry_book JOIN henry_publisher ON henry_book.publisher_code = henry_publisher.publisher_code WHERE henry_book.book_code IN (SELECT book_code FROM henry_inventory) AND henry_book.publisher_code = ?";
     	
-        try {
-            Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT DISTINCT(title), henry_book.book_code, type, henry_book.publisher_code, price, paperback FROM henry_book JOIN henry_publisher ON henry_book.publisher_code = henry_publisher.publisher_code WHERE henry_book.book_code IN (SELECT book_code FROM henry_inventory) AND henry_book.publisher_code = '"+ publisher_code+"'");
+        try (Connection connection = HenryDAO.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, publisher_code);
             
-            while(rs.next())
-            {
-            	
-               String ID = ( rs.getString("book_code"));
-               String title = ( rs.getString("title") );
-               String genre = ( rs.getString("type") );
-               String publisher = (rs.getString("henry_book.publisher_code"));
-               String price = (rs.getString("price"));
-               String paperback = (rs.getString("paperback"));
-                
-                book = new Book(title, ID, genre, price, publisher, paperback);
-                books.add(book);
-                
+            try (ResultSet rs = stmt.executeQuery()) {
+                while(rs.next())
+                {
+                    String ID = ( rs.getString("book_code"));
+                    String title = ( rs.getString("title") );
+                    String genre = ( rs.getString("type") );
+                    String publisher = (rs.getString("henry_book.publisher_code"));
+                    String price = (rs.getString("price"));
+                    String paperback = (rs.getString("paperback"));
+                    
+                    book = new Book(title, ID, genre, price, publisher, paperback);
+                    books.add(book);
+                }
             }
             
         } catch (SQLException ex) {
@@ -194,19 +192,18 @@ public class HenryDAO {
     }
 	
     public static Vector<String> getBookGenres(){
-        Connection connection = HenryDAO.getConnection();
         Vector<String> genres = new Vector<String>();
+        String sql = "SELECT DISTINCT(type) FROM henry_book";
     	
-        try {
-            Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT DISTINCT(type) FROM henry_book");
+        try (Connection connection = HenryDAO.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
             
             while(rs.next())
             {
                String genre = ( rs.getString("type") );
                 
                genres.add(genre);
-                
             }
             
         } catch (SQLException ex) {
@@ -217,26 +214,27 @@ public class HenryDAO {
     }
     
     public static Vector<Book> getBooksByCategory(String genre){
-        Connection connection = HenryDAO.getConnection();
         Vector<Book> books = new Vector<Book>();
     	Book book;
+        String sql = "SELECT DISTINCT(title), henry_book.book_code, type, publisher_code, price, paperback FROM henry_book JOIN henry_inventory ON henry_book.book_code = henry_inventory.book_code WHERE type = ?";
     	
-        try {
-            Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT DISTINCT(title), henry_book.book_code, type, publisher_code, price, paperback, henry_book.book_code, type, publisher_code, price, paperback FROM henry_book JOIN henry_inventory ON henry_book.book_code = henry_inventory.book_code WHERE type = '" + genre +"'");
+        try (Connection connection = HenryDAO.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, genre);
             
-            while(rs.next())
-            {
-                String ID = ( rs.getString("book_code"));
-                String title = ( rs.getString("title") );
-                String type = ( rs.getString("type") );
-                String publisher = (rs.getString("henry_book.publisher_code"));
-                String price = (rs.getString("price"));
-                String paperback = (rs.getString("paperback"));
-                
-               book = new Book(title, ID, type, price, publisher, paperback);
-               books.add(book);
-                
+            try (ResultSet rs = stmt.executeQuery()) {
+                while(rs.next())
+                {
+                    String ID = ( rs.getString("book_code"));
+                    String title = ( rs.getString("title") );
+                    String type = ( rs.getString("type") );
+                    String publisher = (rs.getString("henry_book.publisher_code"));
+                    String price = (rs.getString("price"));
+                    String paperback = (rs.getString("paperback"));
+                    
+                    book = new Book(title, ID, type, price, publisher, paperback);
+                    books.add(book);
+                }
             }
             
         } catch (SQLException ex) {
