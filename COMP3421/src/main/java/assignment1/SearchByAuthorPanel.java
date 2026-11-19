@@ -99,7 +99,7 @@ public class SearchByAuthorPanel extends JPanel {
 					System.out.println("Location: "+ branches.get(0));
 					
 					for(int j = 0; j<branches.size(); j++) {
-						inventory.addElement(branches.get(i));
+						inventory.addElement(branches.get(j));
 					}
 					
 				}
