@@ -1,0 +1,3 @@
+db.url=jdbc:mysql://localhost:3306/bookstore_test?allowMultiQueries=true
+db.user=bookstore_test
+db.password=your_password

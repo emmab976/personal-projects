@@ -15,4 +15,5 @@ target/
 
 # Local config (never commit real credentials)
 db.properties
+test-db.properties
 .env

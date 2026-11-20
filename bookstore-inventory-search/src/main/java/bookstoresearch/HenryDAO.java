@@ -12,11 +12,11 @@ import java.util.Properties;
 import java.util.Vector;
 
 public class HenryDAO {
-    private static final String CONFIG_FILE = "db.properties";
+    private static final String CONFIG_FILE = System.getProperty("db.config", "db.properties");
     private static Properties dbConfig;
 
     /**
-     * Load the database settings from db.properties (only reads the file once)
+     * Load the database settings from the config file (db.properties by default; tests use test-db.properties)
      * @return Properties containing db.url, db.user and db.password
      */
     private static Properties getConfig()
@@ -26,8 +26,8 @@ public class HenryDAO {
           try (InputStream in = new FileInputStream(CONFIG_FILE)) {
               dbConfig.load(in);
           } catch (IOException ex) {
-              System.err.println(CONFIG_FILE + " not found. Copy db.properties.example to "
-                      + CONFIG_FILE + " and fill in your database login (see README setup).");
+              System.err.println(CONFIG_FILE + " not found. Copy " + CONFIG_FILE
+                      + ".example to " + CONFIG_FILE + " and fill in your database login (see README setup).");
               System.exit(1);
           }
       }
